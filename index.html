@@ -190,3 +190,45 @@
     </script>
 </body>
 </html>
+// --- SYSTÈME DE CINÉMATIQUE ---
+function launchIntro() {
+    const introDiv = document.createElement('div');
+    introDiv.id = "intro-layer";
+    introDiv.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:white; z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; transition: opacity 2s;";
+    document.body.appendChild(introDiv);
+
+    const messages = [
+        "Depuis des siècles, l'Abîme Doré était en paix...",
+        "Mais une Ombre s'est levée. Un Monstre que nul ne peut nommer.",
+        "Le monde se meurt. L'or se change en poussière.",
+        "Voyageur, tu es notre seul espoir.",
+        "Réussis les quêtes, monte en niveau, rejoins les Guildes...",
+        "Car seul un guerrier de Niveau 3 pourra affronter le Néant.",
+        "L'Abîme t'observe. Ne faiblis pas."
+    ];
+
+    let i = 0;
+    const textNode = document.createElement('h2');
+    textNode.style = "font-style: italic; max-width: 80%; line-height: 1.6;";
+    introDiv.appendChild(textNode);
+
+    function nextMsg() {
+        if (i < messages.length) {
+            textNode.style.opacity = 0;
+            setTimeout(() => {
+                textNode.innerText = messages[i];
+                textNode.style.opacity = 1;
+                textNode.style.transition = "opacity 1.5s";
+                i++;
+                setTimeout(nextMsg, 4000);
+            }, 1500);
+        } else {
+            introDiv.style.opacity = 0;
+            setTimeout(() => { introDiv.remove(); loadGame(); }, 2000);
+        }
+    }
+    nextMsg();
+}
+
+// Appelle launchIntro() au lieu de loadGame() à la fin de ton script.
+
