@@ -2,48 +2,106 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>THE GILDED ABYSS - SCHOOL</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE GILDED ABYSS - SCHOOL EDITION</title>
 
-<!-- ✅ THREE.JS -->
-<script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
+  <!-- ✅ CHARGEMENT CORRECT DU MOTEUR 3D (Three.js) -->
+  <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
 
-<style>
-body { margin:0; background:black; overflow:hidden; font-family:Segoe UI; }
-#ui {
-  position:absolute; top:10px; left:10px;
-  background:rgba(0,0,0,0.8);
-  color:gold; padding:12px;
-  border:2px solid gold;
-  border-radius:8px;
-}
-#death-screen {
-  display:none;
-  position:fixed;
-  width:100%; height:100%;
-  background:rgba(150,0,0,0.9);
-  color:white;
-  text-align:center;
-  padding-top:150px;
-}
-.btn { padding:10px 20px; cursor:pointer; margin:10px; font-weight:bold; }
-</style>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.85);
+      color: gold;
+      padding: 15px;
+      border: 2px solid gold;
+      border-radius: 10px;
+      min-width: 180px;
+      z-index: 10;
+    }
+
+    #death-screen {
+      display: none;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: rgba(180,0,0,0.9);
+      color: white;
+      text-align: center;
+      padding-top: 150px;
+      z-index: 100;
+    }
+
+    .btn {
+      background: gold;
+      color: black;
+      padding: 12px 24px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 10px;
+      border-radius: 5px;
+    }
+
+    #intro-layer {
+      position: fixed;
+      inset: 0;
+      background: black;
+      color: white;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    #intro-text {
+      max-width: 80%;
+      font-style: italic;
+      line-height: 1.6;
+      opacity: 0;
+      transition: opacity 1.5s;
+    }
+  </style>
 </head>
 
 <body>
 
-<div id="ui">
-<b id="p-name">Vagabond</b><br>
-💰 Or : <span id="p-gold">150</span><br>
-⭐ Lvl : <span id="p-lvl">1</span>
+<!-- 🎬 CINÉMATIQUE -->
+<div id="intro-layer">
+  <h2 id="intro-text"></h2>
 </div>
 
+<!-- 💀 ÉCRAN DE MORT -->
 <div id="death-screen">
-<h1>💀 VOUS ÊTES MORT</h1>
-<button class="btn" onclick="respawn()">RESPAWN</button>
+  <h1>💀 VOUS ÊTES MORT</h1>
+  <p>Vous avez perdu 100 pièces d'or.</p>
+  <button class="btn" onclick="respawn()">RESPAWN</button>
+</div>
+
+<!-- 🧾 INTERFACE -->
+<div id="ui">
+  <b id="p-name">Vagabond</b><br>
+  💰 OR : <span id="p-gold">150</span><br>
+  ⭐ LVL : <span id="p-lvl">1</span>
+  <hr>
+  <small>Z Q S D : Bouger</small>
 </div>
 
 <script>
+/* =======================
+   DONNÉES JOUEUR
+======================= */
 let player = {
   name: "Élève",
   gold: 150,
@@ -55,106 +113,41 @@ let player = {
 let scene, camera, renderer, cube;
 let isDead = false;
 
-// ✅ Chargement sauvegarde
+/* =======================
+   INTRO
+======================= */
+const messages = [
+  "Depuis des siècles, l'Abîme Doré dormait...",
+  "Une Ombre s'est levée.",
+  "Vagabond, le monde compte sur toi.",
+  "Survis. Progresse. Ne tombe pas."
+];
+
+let msgIndex = 0;
+
+function runIntro() {
+  const text = document.getElementById("intro-text");
+
+  if (msgIndex < messages.length) {
+    text.style.opacity = 0;
+    setTimeout(() => {
+      text.textContent = messages[msgIndex++];
+      text.style.opacity = 1;
+      setTimeout(runIntro, 3000);
+    }, 1000);
+  } else {
+    document.getElementById("intro-layer").remove();
+    loadGame();
+  }
+}
+
+/* =======================
+   SAUVEGARDE
+======================= */
 function loadGame() {
   const save = localStorage.getItem("abyme_save");
-  if(save) player = JSON.parse(save);
-  else player.name = prompt("Nom du vagabond ?") || "Élève";
-  init3D();
-  updateUI();
-}
-
-function saveGame() {
-  localStorage.setItem("abyme_save", JSON.stringify(player));
-}
-
-// ✅ THREE
-function init3D() {
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x87ceeb);
-
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-  renderer = new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  scene.add(new THREE.AmbientLight(0xffffff, 1));
-
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(200,200),
-    new THREE.MeshLambertMaterial({color:0x445533})
-  );
-  floor.rotation.x = -Math.PI/2;
-  scene.add(floor);
-
-  cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1,1,1),
-    new THREE.MeshLambertMaterial({color:0x0088ff})
-  );
-  cube.position.set(player.x, 0.5, player.z);
-  scene.add(cube);
-
-  animate();
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-  camera.position.lerp(
-    new THREE.Vector3(cube.position.x, 5, cube.position.z + 8),
-    0.1
-  );
-  camera.lookAt(cube.position);
-  renderer.render(scene, camera);
-}
-
-// ✅ Contrôles
-window.addEventListener("keydown", e => {
-  if(isDead) return;
-
-  const s = 0.5;
-  if(e.key === "z") cube.position.z -= s;
-  if(e.key === "s") cube.position.z += s;
-  if(e.key === "q") cube.position.x -= s;
-  if(e.key === "d") cube.position.x += s;
-  if(e.key === "m") triggerDeath();
-
-  player.x = cube.position.x;
-  player.z = cube.position.z;
-  saveGame();
-});
-
-// ✅ Mort
-function triggerDeath() {
-  if(isDead) return;
-  isDead = true;
-  player.gold = Math.max(0, player.gold - 100);
-  updateUI();
-  saveGame();
-  document.getElementById("death-screen").style.display = "block";
-}
-
-function respawn() {
-  isDead = false;
-  cube.position.set(0,0.5,0);
-  document.getElementById("death-screen").style.display = "none";
-}
-
-// ✅ UI
-function updateUI() {
-  document.getElementById("p-name").innerText = player.name;
-  document.getElementById("p-gold").innerText = player.gold;
-  document.getElementById("p-lvl").innerText = player.lvl;
-}
-
-// ✅ Resize
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-loadGame();
-</script>
-
-</body>
-</html>
+  if (save) {
+    player = JSON.parse(save);
+  } else {
+    player.name = prompt("Nom du vagabond ?") || "Élève";
+  }
