@@ -1,133 +1,140 @@
 <!DOCTYPE html>
-<html 
-lang="fr">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THE GILDED ABYSS - SCHOOL EDITION</title>
-    <!-- Moteur 3D léger pour Chromebook -->
+    <!-- Chargement du moteur 3D -->
     <script src="https://cloudflare.com"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #87ceeb; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        #ui { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.85); color: gold; padding: 15px; border: 2px solid gold; border-radius: 10px; min-width: 180px; pointer-events: none; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #ui { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.85); color: gold; padding: 15px; border: 2px solid gold; border-radius: 10px; min-width: 180px; pointer-events: none; z-index: 10; }
         #death-screen { display: none; position: absolute; width: 100%; height: 100%; background: rgba(180,0,0,0.9); text-align: center; color: white; padding-top: 150px; z-index: 100; }
         .btn { background: gold; color: black; padding: 12px 24px; border: none; cursor: pointer; font-weight: bold; margin: 10px; border-radius: 5px; pointer-events: all; }
-        .btn:hover { background: #ffd700; transform: scale(1.05); }
+        #intro-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; color: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; transition: opacity 2s; }
         #admin-panel { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 3px solid red; padding: 30px; color: #00ff00; z-index: 200; border-radius: 15px; text-align: center; }
-        #msg-box { position: absolute; bottom: 20px; width: 100%; text-align: center; color: white; font-weight: bold; pointer-events: none; text-shadow: 2px 2px 4px #000; }
     </style>
 </head>
 <body>
 
+    <!-- CINÉMATIQUE D'INTRODUCTION -->
+    <div id="intro-layer">
+        <h2 id="intro-text" style="font-style: italic; max-width: 80%; line-height: 1.6; opacity: 0; transition: opacity 1.5s;"></h2>
+    </div>
+
     <!-- ECRAN DE MORT -->
     <div id="death-screen">
         <h1>💀 VOUS ÊTES MORT DANS L'ABÎME</h1>
-        <p style="font-size: 20px;">Vous avez perdu 100 Pièces d'Or.</p>
-        <p>Donnez 0.50€ à Sacha pour récupérer votre or immédiatement.</p>
+        <p>Vous avez perdu 100 Pièces d'Or.</p>
         <button class="btn" onclick="respawn()">RESPAWN (-100 OR)</button>
+        <button class="btn" style="background:white;" onclick="window.open('https://paypal.me')">PAYER 0.50€ (SAUVER L'OR)</button>
     </div>
 
-    <!-- PANEL ADMIN SECRET (SACHA) -->
+    <!-- PANEL ADMIN SECRET (TOUCHE K) -->
     <div id="admin-panel">
-        <h2 style="color: red;">👑 PANEL MAÎTRE DE L'ABÎME</h2>
-        <p>Utilisateur détecté : <span id="adm-user-target">...</span></p>
-        <button class="btn" onclick="adminAddGold()">🎁 RESTAURER +100 OR (Payé)</button> <br>
-        <button class="btn" style="background: #444; color: white;" onclick="generateSaveCode()">📋 GÉNÉRER CODE DE SAUVEGARDE</button> <br>
-        <button class="btn" style="background: #888;" onclick="closeAdmin()">FERMER [X]</button>
+        <h2 style="color: red;">👑 PANEL MAÎTRE (SACHA)</h2>
+        <button class="btn" onclick="adminAddGold()">🎁 RESTAURER +100 OR</button> <br>
+        <button class="btn" onclick="document.getElementById('admin-panel').style.display='none'">FERMER</button>
     </div>
 
     <!-- INTERFACE JOUEUR -->
     <div id="ui">
         <b id="p-name" style="font-size: 20px;">Vagabond</b> <br>
         💰 OR : <span id="p-gold">150</span> <br>
-        ⭐ NIVEAU : <span id="p-lvl">1</span> <br>
+        ⭐ LVL : <span id="p-lvl">1</span> <br>
         <hr style="border: 0.5px solid #444;">
-        <small>Mouvement : [Z,Q,S,D]<br>Menu Admin : [K]</small>
+        <small>Z,Q,S,D : Bouger</small>
     </div>
 
-    <div id="msg-box"></div>
-
     <script>
-        // --- 1. VARIABLES ET SAUVEGARDE ---
-        let player = { name: "Joueur", gold: 150, lvl: 1, x: 0, z: 0, lastSave: Date.now() };
-        const ADMIN_PASS = "ABYME2024"; // Ton code secret à ne pas donner !
+        // --- 1. DONNÉES ET SAUVEGARDE ---
+        let player = { name: "Joueur", gold: 150, lvl: 1, x: 0, z: 0 };
+        const ADMIN_PASS = "ABYME2024";
 
         function loadGame() {
-            const saved = localStorage.getItem('abyme_save_v1');
-            if (saved) {
-                player = JSON.parse(saved);
-            } else {
-                player.name = prompt("Entrez votre nom de Vagabond :") || "Élève";
-                saveGame();
-            }
+            const saved = localStorage.getItem('abyme_save_v2');
+            if (saved) player = JSON.parse(saved);
+            else player.name = prompt("Ton nom de Vagabond ?") || "Élève";
             updateUI();
+            init3D();
         }
 
         function saveGame() {
-            localStorage.setItem('abyme_save_v1', JSON.stringify(player));
+            localStorage.setItem('abyme_save_v2', JSON.stringify(player));
         }
 
-        // --- 2. MOTEUR 3D (LOW-POLY CHROMEBOOK) ---
+        // --- 2. CINÉMATIQUE ---
+        const messages = [
+            "Depuis des siècles, l'Abîme Doré était en paix...",
+            "Mais une Ombre s'est levée. Un Monstre sans nom dévore le monde.",
+            "Voyageur, tu es notre dernier espoir.",
+            "Atteins le Niveau 3 pour affronter le Néant.",
+            "L'Abîme t'observe..."
+        ];
+
+        let msgIdx = 0;
+        function runIntro() {
+            const el = document.getElementById('intro-text');
+            if (msgIdx < messages.length) {
+                el.style.opacity = 0;
+                setTimeout(() => {
+                    el.innerText = messages[msgIdx];
+                    el.style.opacity = 1;
+                    msgIdx++;
+                    setTimeout(runIntro, 4000);
+                }, 1000);
+            } else {
+                document.getElementById('intro-layer').style.opacity = 0;
+                setTimeout(() => {
+                    document.getElementById('intro-layer').remove();
+                    loadGame();
+                }, 2000);
+            }
+        }
+
+        // --- 3. MOTEUR 3D ---
         let scene, camera, renderer, myCube;
         function init3D() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87ceeb); // Ciel bleu
-            scene.fog = new THREE.Fog(0x87ceeb, 5, 50); // Brouillard anti-lag
+            scene.background = new THREE.Color(0x87ceeb);
+            scene.fog = new THREE.Fog(0x87ceeb, 5, 50);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            // Lumière naturelle
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-            scene.add(ambientLight);
-            const sun = new THREE.DirectionalLight(0xffffff, 0.8);
-            sun.position.set(10, 20, 10);
-            scene.add(sun);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshLambertMaterial({color: 0x3d4531}));
+            floor.rotation.x = -Math.PI/2; scene.add(floor);
 
-            // Sol (Herbe de l'école)
-            const floorGeo = new THREE.PlaneGeometry(200, 200);
-            const floorMat = new THREE.MeshLambertMaterial({color: 0x3d4531});
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = -Math.PI / 2;
-            scene.add(floor);
-
-            // Mon Personnage (Cube)
-            const cubeGeo = new THREE.BoxGeometry(1, 1, 1);
-            const cubeMat = new THREE.MeshLambertMaterial({color: 0x0088ff});
-            myCube = new THREE.Mesh(cubeGeo, cubeMat);
-            myCube.position.y = 0.5;
-            scene.add(myCube);
-
+            myCube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({color: 0x0088ff}));
+            myCube.position.y = 0.5; scene.add(myCube);
             animate();
         }
 
         function animate() {
             requestAnimationFrame(animate);
             if(myCube) {
-                // Suivi de caméra fluide
                 camera.position.lerp(new THREE.Vector3(myCube.position.x, 5, myCube.position.z + 8), 0.1);
                 camera.lookAt(myCube.position);
             }
             renderer.render(scene, camera);
         }
 
-        // --- 3. LOGIQUE DE JEU (MORT & ADMIN) ---
+        // --- 4. CONTRÔLES ---
         window.addEventListener('keydown', (e) => {
-            const speed = 0.5;
             if(document.getElementById('death-screen').style.display === 'block') return;
-
-            if(e.key.toLowerCase() === "z") myCube.position.z -= speed;
-            if(e.key.toLowerCase() === "s") myCube.position.z += speed;
-            if(e.key.toLowerCase() === "q") myCube.position.x -= speed;
-            if(e.key.toLowerCase() === "d") myCube.position.x += speed;
-            
-            // Touche secrète Admin
-            if(e.key.toLowerCase() === "k") openAdmin();
-            
-            // Simulation de mort (pour test, à retirer plus tard)
+            const s = 0.5;
+            if(e.key.toLowerCase() === "z") myCube.position.z -= s;
+            if(e.key.toLowerCase() === "s") myCube.position.z += s;
+            if(e.key.toLowerCase() === "q") myCube.position.x -= s;
+            if(e.key.toLowerCase() === "d") myCube.position.x += s;
+            if(e.key.toLowerCase() === "k") {
+                if(prompt("Pass Admin :") === ADMIN_PASS) document.getElementById('admin-panel').style.display='block';
+            }
+            // Simuler mort pour test (touche M)
             if(e.key.toLowerCase() === "m") triggerDeath();
-
             updateUI();
         });
 
@@ -141,34 +148,9 @@ lang="fr">
         function respawn() {
             document.getElementById('death-screen').style.display = 'none';
             myCube.position.set(0, 0.5, 0);
-            updateUI();
         }
 
-        function openAdmin() {
-            const pass = prompt("Mot de Passe Maître (Sacha) :");
-            if(pass === ADMIN_PASS) {
-                document.getElementById('admin-panel').style.display = 'block';
-                document.getElementById('adm-user-target').innerText = player.name;
-            } else {
-                alert("Accès refusé ! Seul Sacha peut ouvrir ce menu.");
-            }
-        }
-
-        function adminAddGold() {
-            player.gold += 100;
-            saveGame();
-            updateUI();
-            alert("100 Or restaurés avec succès !");
-        }
-
-        function closeAdmin() {
-            document.getElementById('admin-panel').style.display = 'none';
-        }
-
-        function generateSaveCode() {
-            const code = btoa(JSON.stringify(player));
-            alert("COPIE CE CODE ET GARDE-LE PRÉCIEUSEMENT :\n\n" + code);
-        }
+        function adminAddGold() { player.gold += 100; saveGame(); updateUI(); alert("Or restauré !"); }
 
         function updateUI() {
             document.getElementById('p-name').innerText = player.name;
@@ -176,62 +158,7 @@ lang="fr">
             document.getElementById('p-lvl').innerText = player.lvl;
         }
 
-        // LANCEMENT AUTOMATIQUE
-        window.onload = () => {
-            loadGame();
-            init3D();
-        };
-
-        // Redimensionnement de la fenêtre
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        window.onload = runIntro;
     </script>
 </body>
 </html>
-// --- SYSTÈME DE CINÉMATIQUE ---
-function launchIntro() {
-    const introDiv = document.createElement('div');
-    introDiv.id = "intro-layer";
-    introDiv.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:white; z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; transition: opacity 2s;";
-    document.body.appendChild(introDiv);
-
-    const messages = [
-        "Depuis des siècles, l'Abîme Doré était en paix...",
-        "Mais une Ombre s'est levée. Un Monstre que nul ne peut nommer.",
-        "Le monde se meurt. L'or se change en poussière.",
-        "Voyageur, tu es notre seul espoir.",
-        "Réussis les quêtes, monte en niveau, rejoins les Guildes...",
-        "Car seul un guerrier de Niveau 3 pourra affronter le Néant.",
-        "L'Abîme t'observe. Ne faiblis pas."
-    ];
-
-    let i = 0;
-    const textNode = document.createElement('h2');
-    textNode.style = "font-style: italic; max-width: 80%; line-height: 1.6;";
-    introDiv.appendChild(textNode);
-
-    function nextMsg() {
-        if (i < messages.length) {
-            textNode.style.opacity = 0;
-            setTimeout(() => {
-                textNode.innerText = messages[i];
-                textNode.style.opacity = 1;
-                textNode.style.transition = "opacity 1.5s";
-                i++;
-                setTimeout(nextMsg, 4000);
-            }, 1500);
-        } else {
-            introDiv.style.opacity = 0;
-            setTimeout(() => { introDiv.remove(); loadGame(); }, 2000);
-        }
-    }
-            </html>
-
-    nextMsg();
-}
-
-// Appelle launchIntro() au lieu de loadGame() à la fin de ton script.
-
