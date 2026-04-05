@@ -1,153 +1,91 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>THE GILDED ABYSS - SCHOOL EDITION</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE GILDED ABYSS - SCHOOL EDITION</title>
 
-  <!-- ✅ CHARGEMENT CORRECT DU MOTEUR 3D (Three.js) -->
-  <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
+<!-- ✅ THREE.JS (CORRECT) -->
+<script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
 
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #000;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-    }
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+  background: black;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
 
-    #ui {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.85);
-      color: gold;
-      padding: 15px;
-      border: 2px solid gold;
-      border-radius: 10px;
-      min-width: 180px;
-      z-index: 10;
-    }
+#ui {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0,0,0,0.85);
+  color: gold;
+  padding: 15px;
+  border: 2px solid gold;
+  border-radius: 10px;
+  z-index: 10;
+}
 
-    #death-screen {
-      display: none;
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background: rgba(180,0,0,0.9);
-      color: white;
-      text-align: center;
-      padding-top: 150px;
-      z-index: 100;
-    }
+#intro-layer {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
 
-    .btn {
-      background: gold;
-      color: pink ;
-      padding: 12px 24px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 10px;
-      border-radius: 5px;
-    }
+#intro-text {
+  max-width: 80%;
+  font-style: italic;
+  font-size: 1.3em;
+  line-height: 1.6;
+  opacity: 0;
+  transition: opacity 1.5s;
+}
 
-    #intro-layer {
-      position: fixed;
-      inset: 0;
-      background: black;
-      color: white;
-      z-index: 9999;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
+#death-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(160,0,0,0.85);
+  color: white;
+  text-align: center;
+  padding-top: 150px;
+  z-index: 100;
+}
 
-    #intro-text {
-      max-width: 80%;
-      font-style: italic;
-      line-height: 1.6;
-      opacity: 0;
-      transition: opacity 1.5s;
-    }
-  </style>
+.btn {
+  background: gold;
+  color: black;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin: 10px;
+  border-radius: 5px;
+}
+</style>
 </head>
 
 <body>
 
-<!-- 🎬 CINÉMATIQUE -->
+<!-- 🎬 INTRO -->
 <div id="intro-layer">
   <h2 id="intro-text"></h2>
 </div>
 
-<!-- 💀 ÉCRAN DE MORT -->
+<!-- 💀 MORT -->
 <div id="death-screen">
   <h1>💀 VOUS ÊTES MORT</h1>
-  <p>Vous avez perdu 100 pièces d'or.</p>
   <button class="btn" onclick="respawn()">RESPAWN</button>
 </div>
 
-<!-- 🧾 INTERFACE -->
+<!-- 🧾 UI -->
 <div id="ui">
   <b id="p-name">Vagabond</b><br>
-  💰 OR : <span id="p-gold">150</span><br>
-  ⭐ LVL : <span id="p-lvl">1</span>
-  <hr>
-  <small>Z Q S D : Bouger</small>
-</div>
-
-<script>
-/* =======================
-   DONNÉES JOUEUR
-======================= */
-let player = {
-  name: "Élève",
-  gold: 150,
-  lvl: 1,
-  x: 0,
-  z: 0
-};
-
-let scene, camera, renderer, cube;
-let isDead = false;
-
-/* =======================
-   INTRO
-======================= */
-const messages = [
-  "Depuis des siècles, l'Abîme Doré dormait...",
-  "Une Ombre s'est levée.",
-  "Vagabond, le monde compte sur toi.",
-  "Survis. Progresse. Ne tombe pas."
-];
-
-let msgIndex = 0;
-
-function runIntro() {
-  const text = document.getElementById("intro-text");
-
-  if (msgIndex < messages.length) {
-    text.style.opacity = 0;
-    setTimeout(() => {
-      text.textContent = messages[msgIndex++];
-      text.style.opacity = 1;
-      setTimeout(runIntro, 3000);
-    }, 1000);
-  } else {
-    document.getElementById("intro-layer").remove();
-    loadGame();
-  }
-}
-
-/* =======================
-   SAUVEGARDE
-======================= */
-function loadGame() {
-  const save = localStorage.getItem("abyme_save");
-  if (save) {
-    player = JSON.parse(save);
-  } else {
-    player.name = prompt("Nom du vagabond ?") || "Élève";
-  }
