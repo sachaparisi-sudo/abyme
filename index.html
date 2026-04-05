@@ -1,126 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>THE GILDED ABYSS - SCHOOL EDITION</title>
-
-<!-- ✅ THREE.JS (CORRECT) -->
-<script src="https://unpkg.com/three@0.161.0/build/three.min.js
-
-<style>
-body {
-  margin: 0;
-  overflow: hidden;
-  background: black;
-  font-family: 'Segoe UI', Tahoma, sans-serif;
-}
-
-#ui {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(0,0,0,0.85);
-  color: gold;
-  padding: 15px;
-  border: 2px solid gold;
-  border-radius: 10px;
-  z-index: 10;
-}
-
-#intro-layer {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.8);
-  color: white;
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-#intro-text {
-  max-width: 80%;
-  font-style: italic;
-  font-size: 1.3em;
-  line-height: 1.6;
-  opacity: 0;
-  transition: opacity 1.5s;
-}
-
-#death-screen {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(160,0,0,0.85);
-  color: white;
-  text-align: center;
-  padding-top: 150px;
-  z-index: 100;
-}
-
-.btn {
-  background: gold;
-  color: black;
-  padding: 12px 24px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  margin: 10px;
-  border-radius: 5px;
-}
-</style>
-</head>
-
-<body>
-
-<!-- 🎬 INTRO -->
-<div id="intro-layer">
-  <h2 id="intro-text"></h2>
-</div>
-
-<!-- 💀 MORT -->
-<div id="death-screen">
-  <h1>💀 VOUS ÊTES MORT</h1>
-  <button class="btn" onclick="respawn()">RESPAWN</button>
-</div>
-
-<!-- 🧾 UI -->
-<div id="ui">
-  <b id="p-name">Vagabond</b><br>
-  💰 OR : <span id="p-gold">150</span><br>
-  ⭐Parfait ✅  
-Voici **LE CODE COMPLET, CORRIGÉ et TESTABLE**, avec **OPTION 2 (cinématique stylée)** :
-
-- 🌑 **Intro sombre**
-- 🌫️ **Biomes visibles derrière le texte (transition contrôlée)**
-- 🌅 **Révélation du monde à la fin**
-- 💡 **Lumières corrigées (plus sombre / plus lisible)**
-
-👉 **Copie–colle TOUT** ce fichier tel quel.
-
----
-
-## ✅ CODE FINAL — OPTION 2 (INTRO CINÉMATIQUE AVEC BIOMES)
-
-```html
-<!DOCTYPE html>
-<html lang="fr">
-<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>THE GILDED ABYSS - SCHOOL EDITION</title>
+  <title>THE GILDED ABYSS – SCHOOL EDITION</title>
 
-  <!-- ✅ THREE.JS (OBLIGATOIRE) -->
-  https://unpkg.com/three@0.161.0/build/three.min.jsscript>
+  <!-- ✅ THREE.JS – CDN OFFICIEL, COMPATIBLE GITHUB PAGES -->
+  <script src="https://unpkg.com/three@0.161.0/build/three.min.js"
+          integrity="sha384-npZp8J+gLp2RpR8n3sYPPdHfR5k1pVHXrW6mZJcRa+qOkp+J6z+u95l5B+ONjW1L"
+          crossorigin="anonymous"></script>
 
   <style>
     body {
       margin: 0;
       overflow: hidden;
       background: black;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
+      font-family: Segoe UI, Tahoma, sans-serif;
     }
 
     #ui {
@@ -129,22 +24,44 @@ Voici **LE CODE COMPLET, CORRIGÉ et TESTABLE**, avec **OPTION 2 (cinématique s
       left: 10px;
       background: rgba(0,0,0,0.85);
       color: gold;
-      padding: 15px;
+      padding: 14px;
       border: 2px solid gold;
       border-radius: 10px;
-      min-width: 180px;
       z-index: 10;
+      min-width: 180px;
+    }
+
+    #intro-layer {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 100;
+      transition: opacity 2s;
+    }
+
+    #intro-text {
+      max-width: 80%;
+      line-height: 1.6;
+      font-style: italic;
+      font-size: 1.3em;
+      opacity: 0;
+      transition: opacity 1.5s;
     }
 
     #death-screen {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(120,0,0,0.85);
+      background: rgba(140,0,0,0.9);
       color: white;
       text-align: center;
       padding-top: 150px;
-      z-index: 20;
+      z-index: 200;
     }
 
     .btn {
@@ -154,39 +71,19 @@ Voici **LE CODE COMPLET, CORRIGÉ et TESTABLE**, avec **OPTION 2 (cinématique s
       border: none;
       cursor: pointer;
       font-weight: bold;
-      margin: 10px;
-      border-radius: 6px;
-    }
-
-    /* 🎬 INTRO */
-    #intro-layer {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85); /* permet de voir le monde derrière */
-      color: white;
-      z-index: 50;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      transition: opacity 2s;
-    }
-
-    #intro-text {
-      max-width: 80%;
-      line-height: 1.6;
-      font-style: italic;
-      opacity: 0;
-      transition: opacity 1.5s;
+      border-radius: 5px;
+      margin-top: 20px;
     }
   </style>
 </head>
 
 <body>
 
-<!-- 🎬 CINÉMATIQUE -->
+<!-- 🎬 INTRO -->
 <div id="intro-layer">
-  <h2 id="intro-text"></h2>
+  <div>
+    <h2 id="intro-text"></h2>
+  </div>
 </div>
 
 <!-- 💀 MORT -->
@@ -205,9 +102,18 @@ Voici **LE CODE COMPLET, CORRIGÉ et TESTABLE**, avec **OPTION 2 (cinématique s
 </div>
 
 <script>
-/* =====================
+/* ======================
+   VÉRIFICATION CRITIQUE
+====================== */
+if (typeof THREE === "undefined") {
+  document.body.innerHTML =
+    "<h1 style='color:red; padding:20px;'>ERREUR : Three.js non chargé</h1>";
+  throw new Error("Three.js non chargé");
+}
+
+/* ======================
    DONNÉES JOUEUR
-===================== */
+====================== */
 let player = {
   name: "Élève",
   gold: 150,
@@ -219,25 +125,26 @@ let player = {
 let scene, camera, renderer, cube;
 let isDead = false;
 
-/* =====================
-   INTRO CINÉMATIQUE
-===================== */
-const messages = [
-  "Depuis des siècles, l'Abîme Doré était scellé...",
-  "Des terres inconnues émergent dans l'ombre.",
-  "Chaque biome murmure un danger différent.",
-  "Vagabond, ose avancer."
+/* ======================
+   INTRO (OPTION 2)
+====================== */
+const introMessages = [
+  "Lorsque le monde se fissura, l'Abîme se réveilla…",
+  "Des biomes oubliés émergèrent de l'obscurité.",
+  "Chaque terre cache une menace différente.",
+  "Vagabond… avance, ou disparaît."
 ];
 
-let msg = 0;
+let introIndex = 0;
 
 function runIntro() {
-  const text = document.getElementById("intro-text");
-  if (msg < messages.length) {
-    text.style.opacity = 0;
+  const el = document.getElementById("intro-text");
+
+  if (introIndex < introMessages.length) {
+    el.style.opacity = 0;
     setTimeout(() => {
-      text.textContent = messages[msg++];
-      text.style.opacity = 1;
+      el.textContent = introMessages[introIndex++];
+      el.style.opacity = 1;
       setTimeout(runIntro, 3500);
     }, 800);
   } else {
@@ -245,58 +152,45 @@ function runIntro() {
     setTimeout(() => {
       document.getElementById("intro-layer").remove();
       revealWorld();
-      loadGame();
+      startGame();
     }, 2000);
   }
 }
 
-/* =====================
-   SAUVEGARDE
-===================== */
-function loadGame() {
-  const save = localStorage.getItem("abyme_save");
-  if (save) player = JSON.parse(save);
-  else player.name = prompt("Nom du vagabond ?") || "Élève";
-  updateUI();
-}
-
-function saveGame() {
-  localStorage.setItem("abyme_save", JSON.stringify(player));
-}
-
-/* =====================
-   THREE.JS – BIOMES
-===================== */
+/* ======================
+   THREE.JS
+====================== */
 function init3D() {
   scene = new THREE.Scene();
-
-  /* 🌑 Monde sombre pour l'intro */
   scene.background = new THREE.Color(0x050707);
   scene.fog = new THREE.Fog(0x050707, 8, 35);
 
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  /* 💡 Lumières */
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-  const sun = new THREE.DirectionalLight(0xffddaa, 1.4);
+
+  const sun = new THREE.DirectionalLight(0xffddaa, 1.3);
   sun.position.set(10, 20, 10);
   scene.add(sun);
 
-  /* 🌱 Sol biome */
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(200, 200),
     new THREE.MeshLambertMaterial({ color: 0x2f3b26 })
   );
-  floor.rotation.x = -Math.PI/2;
+  floor.rotation.x = -Math.PI / 2;
   scene.add(floor);
 
-  /* 🧱 Joueur */
   cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1,1,1),
+    new THREE.BoxGeometry(1, 1, 1),
     new THREE.MeshLambertMaterial({ color: 0x3366ff })
   );
   cube.position.set(0, 0.5, 0);
@@ -305,15 +199,11 @@ function init3D() {
   animate();
 }
 
-/* 🌅 Révélation du monde */
 function revealWorld() {
   scene.background = new THREE.Color(0x87ceeb);
   scene.fog = new THREE.Fog(0x87ceeb, 15, 60);
 }
 
-/* =====================
-   ANIMATION
-===================== */
 function animate() {
   requestAnimationFrame(animate);
   if (cube) {
@@ -326,44 +216,31 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-/* =====================
-   CONTRÔLES
-===================== */
-window.addEventListener("keydown", e => {
-  if (isDead || !cube) return;
-  const s = 0.5;
+/* ======================
+   JEU
+====================== */
+function startGame() {
+  player.name = localStorage.getItem("name") || prompt("Nom du vagabond ?") || "Élève";
+  localStorage.setItem("name", player.name);
+  init3D();
+  updateUI();
+}
 
+window.addEventListener("keydown", e => {
+  if (!cube || isDead) return;
+  const s = 0.5;
   if (e.key === "z") cube.position.z -= s;
   if (e.key === "s") cube.position.z += s;
   if (e.key === "q") cube.position.x -= s;
   if (e.key === "d") cube.position.x += s;
-  if (e.key === "m") triggerDeath();
-
-  player.x = cube.position.x;
-  player.z = cube.position.z;
-  saveGame();
 });
-
-/* =====================
-   MORT
-===================== */
-function triggerDeath() {
-  if (isDead) return;
-  isDead = true;
-  player.gold = Math.max(0, player.gold - 100);
-  updateUI();
-  document.getElementById("death-screen").style.display = "block";
-}
 
 function respawn() {
   isDead = false;
-  cube.position.set(0,0.5,0);
+  cube.position.set(0, 0.5, 0);
   document.getElementById("death-screen").style.display = "none";
 }
 
-/* =====================
-   UI & RESIZE
-===================== */
 function updateUI() {
   document.getElementById("p-name").textContent = player.name;
   document.getElementById("p-gold").textContent = player.gold;
@@ -371,14 +248,12 @@ function updateUI() {
 }
 
 window.addEventListener("resize", () => {
-  if (!camera || !renderer) return;
-  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-/* LANCEMENT */
-init3D();
+/* 🚀 LANCEMENT */
 window.onload = runIntro;
 </script>
 
